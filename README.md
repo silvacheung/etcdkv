@@ -36,7 +36,7 @@
 			etcdkv.ClientDialKeepAliveTime(time.Second*5),
 			etcdkv.ClientDialKeepAliveTimeout(time.Second*5),
 		),
-		etcdkv.WatcherNamespace(DefaultNamespace), // 设置监听的命名空间
+		etcdkv.WatcherNamespace(etcdkv.DefaultNamespace), // 设置监听的命名空间
 		etcdkv.WatcherTTL(time.Second*5), // 设置主动检测时间,不设置则不自动检测
 		etcdkv.WatcherResolver(&PrintWatchKvResolver{}), // 设置监听事件时的key/value处理器
 	)
