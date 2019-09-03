@@ -3,7 +3,7 @@ package etcdkv
 import (
 	"fmt"
 	"github.com/coreos/etcd/clientv3"
-	"github.com/marcosxzhang/log"
+	"log"
 	"os"
 	"runtime/debug"
 	"strings"
@@ -37,7 +37,7 @@ func WatcherClient(opts ...ClientOption) WatcherOption {
 	}
 	client, err := clientv3.New(clientOpt.cfg)
 	if err != nil {
-		log.Errorf("the etcd watcher get client error:%v\n", err)
+		log.Println("the etcd watcher get client error:", err)
 	}
 	return func(o *watcherOption) {
 		o.client = client
