@@ -16,7 +16,9 @@ var watcherErrorHandler = func(err error) {
 }
 
 func SetWatcherErrorHandler(fn func(error)) {
-	watcherErrorHandler = fn
+	if fn != nil {
+		watcherErrorHandler = fn
+	}
 }
 
 // register注册器选项

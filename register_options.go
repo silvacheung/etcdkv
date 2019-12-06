@@ -14,7 +14,9 @@ var registerErrorHandler = func(err error) {
 }
 
 func SetRegisterErrorHandler(fn func(error)) {
-	registerErrorHandler = fn
+	if fn != nil {
+		registerErrorHandler = fn
+	}
 }
 
 type kvs struct {
