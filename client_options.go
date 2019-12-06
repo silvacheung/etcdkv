@@ -20,6 +20,9 @@ type clientOption struct {
 type ClientOption func(*clientOption)
 
 func ClientName(name string) ClientOption {
+	if name == "" {
+		name = DefaultClientName
+	}
 	return func(o *clientOption) {
 		o.name = name
 	}
