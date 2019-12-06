@@ -80,7 +80,7 @@ func ClientRejectOldCluster(reject bool) ClientOption {
 	}
 }
 
-func ClientDialOptions(options []grpc.DialOption) ClientOption {
+func ClientDialOptions(options ...grpc.DialOption) ClientOption {
 	return func(o *clientOption) {
 		o.cfg.DialOptions = options
 	}
