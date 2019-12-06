@@ -36,7 +36,7 @@ type registerOption struct {
 type RegisterOption func(*registerOption)
 
 func RegisterClient(opts ...ClientOption) RegisterOption {
-	client, err := newClientV3(opts...)
+	_, client, err := newClientV3(opts...)
 	if err != nil {
 		registerErrorHandler(err)
 	}

@@ -33,7 +33,7 @@ type watcherOption struct {
 type WatcherOption func(*watcherOption)
 
 func WatcherClient(opts ...ClientOption) WatcherOption {
-	client, err := newClientV3(opts...)
+	_, client, err := newClientV3(opts...)
 	if err != nil {
 		log.Println("the etcd watcher get client error:", err)
 	}
