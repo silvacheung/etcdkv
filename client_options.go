@@ -9,10 +9,21 @@ import (
 	"time"
 )
 
+const DefaultClientName = "globalClient"
+
 // client客户端选项
-type clientOption struct{ cfg clientv3.Config }
+type clientOption struct {
+	name string
+	cfg  clientv3.Config
+}
 
 type ClientOption func(*clientOption)
+
+func ClientName(name string) ClientOption {
+	return func(o *clientOption) {
+		o.name = name
+	}
+}
 
 func ClientEndpoints(endpoints string) ClientOption {
 	return func(o *clientOption) {
