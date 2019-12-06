@@ -34,11 +34,7 @@ type registerOption struct {
 type RegisterOption func(*registerOption)
 
 func RegisterClient(opts ...ClientOption) RegisterOption {
-	clientOpt := &clientOption{}
-	for _, opt := range opts {
-		opt(clientOpt)
-	}
-	client, err := clientv3.New(clientOpt.cfg)
+	client, err := NewClientV3(opts...)
 	if err != nil {
 		registerErrorHandler(err)
 	}
