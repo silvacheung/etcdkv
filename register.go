@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	DefaultNamespace     = "default"
 	DefaultKey           = "default"
 	DefaultValue         = "default"
 	DefaultLeaseFaultTTL = time.Second * 30
@@ -40,10 +39,6 @@ func NewRegister(opts ...RegisterOption) *Register {
 	if opt.client == nil {
 		registerErrorHandler(errors.New("etcdkv register client is empty"))
 		return nil
-	}
-
-	if len(opt.namespace) == 0 {
-		opt.namespace = DefaultNamespace
 	}
 
 	if len(opt.kvs) == 0 {

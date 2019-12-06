@@ -9,11 +9,12 @@ func TestNewWatcher(t *testing.T) {
 
 	watcher := NewWatcher(
 		WatcherClient(
-			ClientEndpoints("127.0.0.1:2379"),
+			ClientEndpoints("127.0.0.1:2379,127.0.0.1:2389,127.0.0.1:2399"),
 			ClientDialKeepAliveTime(time.Second*5),
+			ClientDialTimeout(time.Second*5),
 			ClientDialKeepAliveTimeout(time.Second*5),
 		),
-		WatcherNamespace(DefaultNamespace),
+		WatcherNamespace("/"),
 		WatcherTTL(time.Second*5),
 		WatcherResolver(&PrintWatchKvResolver{}),
 	)

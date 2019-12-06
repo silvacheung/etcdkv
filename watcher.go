@@ -33,11 +33,6 @@ func NewWatcher(opts ...WatcherOption) *Watcher {
 		return nil
 	}
 
-	if len(opt.namespace) == 0 {
-		opt.namespace = DefaultNamespace
-		opt.sepNamespace = namespaceWarp(DefaultNamespace)
-	}
-
 	if opt.ttl == 0 {
 		opt.ttl = DefaultTTL
 	}
