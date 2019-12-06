@@ -34,10 +34,14 @@ type registerOption struct {
 type RegisterOption func(*registerOption)
 
 func RegisterClient(opts ...ClientOption) RegisterOption {
-	client, err := NewClientV3(opts...)
+	client, err := newClientV3(opts...)
 	if err != nil {
 		registerErrorHandler(err)
 	}
+	return RegisterSetClient(client)
+}
+
+func RegisterSetClient(client *clientv3.Client) RegisterOption {
 	return func(o *registerOption) {
 		o.client = client
 	}

@@ -6,13 +6,17 @@ import (
 
 var clientV3 *clientv3.Client
 
-func NewClientV3(opts ...ClientOption) (*clientv3.Client, error) {
+func newClientV3(opts ...ClientOption) (*clientv3.Client, error) {
 	clientOpt := &clientOption{}
 	for _, opt := range opts {
 		opt(clientOpt)
 	}
+	return clientv3.New(clientOpt.cfg)
+}
+
+func NewClientV3(opts ...ClientOption) (*clientv3.Client, error) {
 	var err error
-	clientV3, err = clientv3.New(clientOpt.cfg)
+	clientV3, err = newClientV3(opts...)
 	return clientV3, err
 }
 
