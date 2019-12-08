@@ -43,7 +43,7 @@ func NewWatcher(opts ...WatcherOption) *Watcher {
 
 	wait, ticker := &sync.WaitGroup{}, time.NewTicker(opt.ttl)
 	ctx, cancel := context.WithCancel(context.Background())
-	watchCh := opt.client.Watch(ctx, opt.sepNamespace, clientv3.WithPrefix())
+	watchCh := opt.client.Watch(ctx, opt.sepNamespace, clientv3.WithPrefix(), clientv3.WithPrevKV())
 
 	return &Watcher{opt: opt, watchCh: watchCh, ctx: ctx, cancel: cancel, wait: wait, ticker: ticker}
 }
