@@ -50,6 +50,9 @@ func WatcherNamespace(namespace string) WatcherOption {
 	return func(o *watcherOption) {
 		o.namespace = namespace
 		o.sepNamespace = namespaceWarp(namespace)
+		if o.namespace == "" {
+			o.namespace = o.sepNamespace
+		}
 	}
 }
 
@@ -66,5 +69,5 @@ func WatcherResolver(resolver WatcherKvResolver) WatcherOption {
 }
 
 func namespaceWarp(namespace string) string {
-	return fmt.Sprintf("/%s/", strings.Trim(namespace, "/"))
+	return fmt.Sprintf("%s/", strings.Trim(namespace, "/"))
 }

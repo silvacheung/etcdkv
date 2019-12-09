@@ -127,7 +127,7 @@ func (r *Register) unRegister() {
 
 // return '/namespace/k, now(s):v'
 func (r *Register) multiKv(now int64, k, v string) (key, value string) {
-	key = fmt.Sprintf("/%s/%s", strings.Trim(r.opt.namespace, "/"), k)
+	key = fmt.Sprintf("%s/%s", strings.Trim(r.opt.namespace, "/"), k)
 	value = fmt.Sprintf("%d:%s", now, v)
 	return
 }
