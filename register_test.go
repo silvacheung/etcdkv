@@ -1,6 +1,8 @@
 package etcdkv
 
 import (
+	"os"
+	"os/signal"
 	"testing"
 	"time"
 )
@@ -14,7 +16,7 @@ func TestNewRegister(t *testing.T) {
 			ClientDialTimeout(time.Second*5),
 			ClientDialKeepAliveTimeout(time.Second*5),
 		),
-		RegisterTTL(time.Second*50),
+		RegisterTTL(time.Second*10),
 		RegisterLeaseFaultTTL(time.Second*5),
 		RegisterNamespace("/"),
 		RegisterKvs("1", "1111:1:1:1"),
@@ -25,6 +27,7 @@ func TestNewRegister(t *testing.T) {
 	defer register.Close()
 	register.Start()
 
-	// 注册后10秒退出
-	time.Sleep(time.Second * 10)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Kill, os.Interrupt)
+	<-c
 }

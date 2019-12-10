@@ -1,6 +1,8 @@
 package etcdkv
 
 import (
+	"os"
+	"os/signal"
 	"testing"
 	"time"
 )
@@ -22,6 +24,7 @@ func TestNewWatcher(t *testing.T) {
 	defer watcher.Close()
 	watcher.Start()
 
-	// 监听60秒退出
-	time.Sleep(time.Second * 60)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Kill, os.Interrupt)
+	<-c
 }
