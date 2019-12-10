@@ -107,8 +107,6 @@ func (r *Register) register() {
 		if _, err := lease.KeepAlive(r.ctx, r.leaseId); err != nil {
 			registerErrorHandler(err)
 		}
-
-		fmt.Println(leaseInfo.TTL, leaseInfo.GrantedTTL)
 	}
 
 	if r.leaseId > 0 {
