@@ -3,26 +3,22 @@
 一个etcd的快速可拓展key/value事件监听包，可以快速用于服务注册与发现
 也可以快速的实现一个简单的服务配置中心
 ```
-# 依赖
-```
-使用命令快速解决：go mod tidy 
-或者查看go.mod自己解决依赖包
-```
+
 # 例子
 ## 向etcd指定的命名空间下注册
 ```
-    register := etcdkv.NewRegister(
-		etcdkv.RegisterClient( // 设置etcd客户端
-			etcdkv.ClientEndpoints("127.0.0.1:2379"),
-			etcdkv.ClientDialKeepAliveTime(time.Second*5),
-			etcdkv.ClientDialKeepAliveTimeout(time.Second*5),
+	register := NewRegister(
+		RegisterClient(
+			ClientEndpoints("127.0.0.1:2379,127.0.0.1:2389,127.0.0.1:2399"),
+			ClientDialKeepAliveTime(time.Second*5),
+			ClientDialTimeout(time.Second*5),
+			ClientDialKeepAliveTimeout(time.Second*5),
 		),
-		etcdkv.RegisterTTL(time.Second*50), // 设置TTL,主要用于租约
-		etcdkv.RegisterLeaseFaultTTL(time.Second*5), // 设置一个租约的容错时间,即延长租约失效时间
-		etcdkv.RegisterNamespace(etcdkv.DefaultNamespace), // 设置注册的命名空间
-		etcdkv.RegisterKvs("1", "1111:1:1:1"), // 要注册的一系列key/value,支持多个
-		etcdkv.RegisterKvs("2", "2222:2:2:2"),
-		etcdkv.RegisterKvs("3", "3333:3:3:3"),
+		RegisterTTL(time.Second*10),
+		RegisterNamespace("/"),
+		RegisterKvs("1", "1111:1:1:1"),
+		RegisterKvs("2", "2222:2:2:2"),
+		RegisterKvs("3", "3333:3:3:3"),
 	)
 
 	defer register.Close()
@@ -30,19 +26,22 @@
 ```
 ## 监听etcd指定的命名空间
 ```
-    watcher := etcdkv.NewWatcher(
-		etcdkv.WatcherClient( // 设置etcd客户端
-			etcdkv.ClientEndpoints("127.0.0.1:2379"),
-			etcdkv.ClientDialKeepAliveTime(time.Second*5),
-			etcdkv.ClientDialKeepAliveTimeout(time.Second*5),
+	register := NewRegister(
+		RegisterClient(
+			ClientEndpoints("127.0.0.1:2379,127.0.0.1:2389,127.0.0.1:2399"),
+			ClientDialKeepAliveTime(time.Second*5),
+			ClientDialTimeout(time.Second*5),
+			ClientDialKeepAliveTimeout(time.Second*5),
 		),
-		etcdkv.WatcherNamespace(etcdkv.DefaultNamespace), // 设置监听的命名空间
-		etcdkv.WatcherTTL(time.Second*5), // 设置主动检测时间,不设置则不自动检测
-		etcdkv.WatcherResolver(&PrintWatchKvResolver{}), // 设置监听事件时的key/value处理器
+		RegisterTTL(time.Second*10),
+		RegisterNamespace("/"),
+		RegisterKvs("1", "1111:1:1:1"),
+		RegisterKvs("2", "2222:2:2:2"),
+		RegisterKvs("3", "3333:3:3:3"),
 	)
 
-	defer watcher.Close()
-	watcher.Start()
+	defer register.Close()
+	register.Start()
 ```
 ## 自定义处理监听到变化的key/value信息
 ```
