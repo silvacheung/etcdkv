@@ -1,16 +1,13 @@
 package etcdkv
 
 import (
-	"fmt"
 	"github.com/coreos/etcd/clientv3"
-	"os"
-	"runtime/debug"
+	"log"
 	"time"
 )
 
 var registerErrorHandler = func(err error) {
-	fmt.Fprintf(os.Stderr, "etcdkv register error:%v \n", err)
-	debug.PrintStack()
+	log.Printf("etcdkv register error:%v \n", err)
 }
 
 func SetRegisterErrorHandler(fn func(error)) {
@@ -26,11 +23,10 @@ type kvs struct {
 
 // register注册器选项
 type registerOption struct {
-	client        *clientv3.Client
-	namespace     string
-	kvs           []kvs
-	ttl           time.Duration
-	leaseFaultTTL time.Duration
+	client    *clientv3.Client
+	namespace string
+	kvs       []kvs
+	ttl       time.Duration
 }
 
 type RegisterOption func(*registerOption)
@@ -64,11 +60,5 @@ func RegisterKvs(k, v string) RegisterOption {
 func RegisterTTL(ttl time.Duration) RegisterOption {
 	return func(o *registerOption) {
 		o.ttl = ttl
-	}
-}
-
-func RegisterLeaseFaultTTL(fault time.Duration) RegisterOption {
-	return func(o *registerOption) {
-		o.leaseFaultTTL = fault
 	}
 }

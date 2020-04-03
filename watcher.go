@@ -2,11 +2,10 @@ package etcdkv
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"log"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -18,38 +17,39 @@ type Watcher struct {
 	watchCh clientv3.WatchChan
 	wait    *sync.WaitGroup
 	ticker  *time.Ticker
+	closed  bool
 }
 
 func NewWatcher(opts ...WatcherOption) *Watcher {
 
-	opt := &watcherOption{}
+	opt := &watcherOption{
+		ttl:      time.Minute * 10,
+		resolver: &PrintWatchKvResolver{},
+	}
 
 	for _, optFun := range opts {
 		optFun(opt)
 	}
 
 	if opt.client == nil {
-		watcherErrorHandler(errors.New("etcdkv watcher client is empty"))
+		watcherErrorHandler(fmt.Errorf("client is empty"))
 		return nil
-	}
-
-	if opt.ttl == 0 {
-		opt.ttl = DefaultTTL
-	}
-
-	if opt.resolver == nil {
-		opt.resolver = &PrintWatchKvResolver{}
 	}
 
 	wait, ticker := &sync.WaitGroup{}, time.NewTicker(opt.ttl)
 	ctx, cancel := context.WithCancel(context.Background())
-	watchCh := opt.client.Watch(ctx, opt.sepNamespace, clientv3.WithPrefix(), clientv3.WithPrevKV())
 
-	return &Watcher{opt: opt, watchCh: watchCh, ctx: ctx, cancel: cancel, wait: wait, ticker: ticker}
+	return &Watcher{opt: opt, ctx: ctx, cancel: cancel, wait: wait, ticker: ticker}
 }
 
 func (w *Watcher) Start() {
-	go w.start()
+	// First Get The Namespace
+	w.fromNamespace()
+	w.wait.Add(1)
+	go func() {
+		defer w.wait.Done()
+		w.start()
+	}()
 }
 
 func (w *Watcher) Close() {
@@ -57,11 +57,18 @@ func (w *Watcher) Close() {
 }
 
 func (w *Watcher) start() {
-	// First Get The Namespace
-	w.fromNamespace()
+retry:
+	w.watch()
 	for {
 		select {
-		case change := <-w.watchCh: // 监听变化
+		case change, ok := <-w.watchCh: // 监听变化
+			if (!ok || change.Err() != nil) && !w.closed {
+				err := fmt.Errorf("%v, watch chan closed, retry again 3 second later", change.Err())
+				watcherErrorHandler(err)
+				time.Sleep(time.Second * 3)
+				log.Printf("etcdkv watcher start retry ... \n")
+				goto retry
+			}
 			for _, event := range change.Events {
 				kv := event.Kv
 				if kv == nil {
@@ -78,21 +85,22 @@ func (w *Watcher) start() {
 		case <-w.ticker.C: // 定时拉取
 			w.fromNamespace()
 		case <-w.ctx.Done(): // 监听关闭
-			log.Println("the watcher context is done")
-			if err := w.opt.client.Close(); err != nil {
-				watcherErrorHandler(err)
-			}
-			w.ticker.Stop()
-			w.wait.Done()
+			log.Println("etcdkv watcher context is done")
+			w.closeClient()
+			w.closeTicker()
 			return
 		}
 	}
 }
 
 func (w *Watcher) close() {
-	w.wait.Add(1)
+	w.closed = true
 	w.cancel()
 	w.wait.Wait()
+}
+
+func (w *Watcher) watch() {
+	w.watchCh = w.opt.client.Watch(w.ctx, w.opt.sepNamespace, clientv3.WithPrefix(), clientv3.WithPrevKV())
 }
 
 func (w *Watcher) fromNamespace() {
@@ -106,7 +114,7 @@ func (w *Watcher) fromNamespace() {
 	}
 }
 
-// 从key中去除namespace,从value中解析出该key的put的时间(s)和真实的值:key格式=/namespace/key;value格式=时间戳(s):value
+// 从key中去除namespace;key格式=/namespace/key
 func (w *Watcher) parseKv(key, value []byte) (k []byte, v []byte, putTime int64) {
 
 	k, v = key, value
@@ -116,12 +124,15 @@ func (w *Watcher) parseKv(key, value []byte) (k []byte, v []byte, putTime int64)
 		k = key[lenNamespace:]
 	}
 
-	// parse value and timestamp(s)
-	if len(value) > 10 {
-		if timestamp, err := strconv.Atoi(string(value[:10])); err == nil {
-			v, putTime = value[11:], int64(timestamp)
-		}
-	}
-
 	return
+}
+
+func (w *Watcher) closeClient() {
+	if err := w.opt.client.Close(); err != nil {
+		watcherErrorHandler(err)
+	}
+}
+
+func (w *Watcher) closeTicker() {
+	w.ticker.Stop()
 }

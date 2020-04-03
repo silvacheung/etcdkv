@@ -17,7 +17,6 @@ func TestNewRegister(t *testing.T) {
 			ClientDialKeepAliveTimeout(time.Second*5),
 		),
 		RegisterTTL(time.Second*10),
-		RegisterLeaseFaultTTL(time.Second*5),
 		RegisterNamespace("/"),
 		RegisterKvs("1", "1111:1:1:1"),
 		RegisterKvs("2", "2222:2:2:2"),

@@ -1,6 +1,6 @@
 module github.com/marcosxz/etcdkv
 
-go 1.12
+go 1.14
 
 require (
 	github.com/coreos/bbolt v1.3.3 // indirect

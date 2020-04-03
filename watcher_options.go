@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"log"
-	"os"
-	"runtime/debug"
 	"strings"
 	"time"
 )
 
 var watcherErrorHandler = func(err error) {
-	fmt.Fprintf(os.Stderr, "etcdkv watcher error:%v \n", err)
-	debug.PrintStack()
+	log.Printf("etcdkv watcher error:%v \n", err)
 }
 
 func SetWatcherErrorHandler(fn func(error)) {
