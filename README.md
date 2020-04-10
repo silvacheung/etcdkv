@@ -26,22 +26,20 @@
 ```
 ## 监听etcd指定的命名空间
 ```
-	register := NewRegister(
-		RegisterClient(
+	watcher := NewWatcher(
+		WatcherClient(
 			ClientEndpoints("127.0.0.1:2379,127.0.0.1:2389,127.0.0.1:2399"),
 			ClientDialKeepAliveTime(time.Second*5),
 			ClientDialTimeout(time.Second*5),
 			ClientDialKeepAliveTimeout(time.Second*5),
 		),
-		RegisterTTL(time.Second*10),
-		RegisterNamespace("/"),
-		RegisterKvs("1", "1111:1:1:1"),
-		RegisterKvs("2", "2222:2:2:2"),
-		RegisterKvs("3", "3333:3:3:3"),
+		WatcherNamespace("/"),
+		WatcherTTL(time.Second*5),
+		WatcherResolver(&PrintWatchKvResolver{}),
 	)
 
-	defer register.Close()
-	register.Start()
+	defer watcher.Close()
+	watcher.Start()
 ```
 ## 自定义处理监听到变化的key/value信息
 ```
